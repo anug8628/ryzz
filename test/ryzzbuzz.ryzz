@@ -1,0 +1,26 @@
+func fizzbuzz(num n, func() -> none fizz, func() -> none, buzz) -> none {
+    for(num i = 1; i <= n; i += 1) {
+        if (i % 3 == 0 and i % 5 == 0) {
+            fizz();
+            buzz();
+        }
+        elif (i % 3 == 0) {
+            fizz();
+        }
+        elif (i % 5 == 0) {
+            buzz();
+        }
+        print("\n")
+    }
+}
+
+func say_rizz() -> none {
+    print("rizz");
+}
+
+func say_buzz() -> none {
+    print("buzz");
+}
+
+func (num n) -> none rizzbuzz = fizzbuzz(n, say_rizz, say_buzz);
+
