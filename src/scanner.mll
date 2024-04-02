@@ -1,4 +1,14 @@
-{ open Parser }
+{ 
+  open Parser 
+  open Lexing
+
+  let next_line lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  lexbuf.lex_curr_p <-
+    { pos with pos_bol = lexbuf.lex_curr_pos;
+      pos_lnum = pos.pos_lnum + 1
+    }
+}
 
 let letter = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
@@ -8,13 +18,6 @@ let exponent = ('E' | 'e') digit+
 let number = digit+ ('.' digit+)? exponent?
 let id = letter (letter | digit | '_')*
 let string = '"' ascii* '"'
-
-let next_line lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  lexbuf.lex_curr_p <-
-    { pos with pos_bol = lexbuf.lex_curr_pos;
-               pos_lnum = pos.pos_lnum + 1
-    }
 
 rule tokenize = parse
   [' ' '\t' '\r' '\n'] { tokenize lexbuf }
