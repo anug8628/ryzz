@@ -7,7 +7,7 @@ let exponent = ('E' | 'e') digit+
 
 let number = digit+ ('.' digit+)? exponent?
 let id = letter (letter | digit | '_')*
-let string = '"'' ascii* '"''
+let string = '"' ascii* '"'
 
 let next_line lexbuf =
   let pos = lexbuf.lex_curr_p in
