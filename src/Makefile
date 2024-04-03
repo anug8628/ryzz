@@ -28,4 +28,4 @@ scanner.cmx : parser.cmx
 
 .PHONY : clean
 clean :
-	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml 
+	rm -rf *.cmi *.cmo parser.ml parser.mli scanner.ml ast_pp
