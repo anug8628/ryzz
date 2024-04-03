@@ -44,7 +44,7 @@ vdecl:
 
 /* fdecl */
 func_def:
-  FUNC STRINGLIT LPAREN formals_opt RPAREN ARROW typ LCURLY stmt_list RCURLY
+  FUNC ID LPAREN formals_opt RPAREN ARROW typ LCURLY stmt_list RCURLY
   { FuncDef (
       {
         rtyp=$7;
@@ -67,6 +67,7 @@ typ:
     NUM   { Num   }
   | BOOL  { Bool  }
   | STRING { String }
+  | NONE { None }
   | typ LSQUARE RSQUARE {Arr ($1)} 
   | FUNC LPAREN typ_opt RPAREN ARROW typ { Func ($3, $6) }
   | LPAREN typ RPAREN { $2 }
@@ -113,7 +114,8 @@ expr:
   | expr AND    expr { Binop($1, And,   $3)   }
   | expr OR     expr { Binop($1, Or,    $3)   }
   | NOT expr         { Unop(Not, $2)   }
-  | ID ASSIGN expr   { Assign($1, $3)         }
+  | vdecl ASSIGN expr   { DecAssign($1, $3)         }
+  | ID ASSIGN expr      { Assign ($1, $3) }
   | LPAREN expr RPAREN { $2                   }
   /* call */
   | ID LPAREN args_opt RPAREN { Call ($1, $3)  }

@@ -15,6 +15,7 @@ let rec string_of_op = function
   | And -> "AND"
   | Or -> "OR"
   | Not -> "NOT"
+  | Mod -> "MOD"
 
 let rec string_of_typ = function
   | Num -> "num"
@@ -24,6 +25,8 @@ let rec string_of_typ = function
   | Func (args, ret) -> "func { params: [" ^ String.concat ", " (List.map string_of_typ args) ^ "], rtype: " ^ string_of_typ ret ^ "}" 
   | None -> "none"
 
+let string_of_vdecl (typ, id) = "VDECL {" ^ string_of_typ typ ^ ", " ^ id ^ "}"
+
 let rec string_of_expr = function
   | NumLit n -> "NUMLIT {" ^ string_of_float n ^ "}"
   | BoolLit b -> "BOOLLIT {" ^ string_of_bool b ^ "}"
@@ -32,6 +35,7 @@ let rec string_of_expr = function
   | Binop (e1, op, e2) -> "BINOP {" ^ string_of_expr e1 ^ " " ^ string_of_op op ^ " " ^ string_of_expr e2 ^ "}"
   | Unop (op, e) -> "UNOP {" ^ string_of_op op ^ string_of_expr e ^ "}"
   | Assign (id, e) -> "ASSIGN {" ^ id ^ " = " ^ string_of_expr e ^ "}"
+  | DecAssign (vdecl, e) -> "DECASSIGN {" ^ string_of_vdecl vdecl ^ " = " ^ string_of_expr e ^ "}"
   | Call (fn, args) -> "CALL {" ^ fn ^ ", [" ^ String.concat ", " (List.map string_of_expr args) ^ "]}"
 
 let string_of_bind (typ, name) = "BIND {" ^ string_of_typ typ ^ ", " ^ name ^ "}"
@@ -50,7 +54,7 @@ let rec string_of_stmt = function
   "formals: { [" ^ String.concat ", " (List.map string_of_bind func_def.formals) ^ "] }, " ^
   "body: { [" ^ String.concat ", " (List.map string_of_stmt func_def.body) ^ "] }"
 
-let string_of_program stmt_list = "PROGRAM { " ^ String.concat ", " (List.map string_of_stmt stmt_list) ^ " }"
+let string_of_program stmt_list = "PROGRAM { [" ^ String.concat ", " (List.map string_of_stmt stmt_list) ^ "] }"
 
 let _ =
     let lexbuf = Lexing.from_channel stdin in

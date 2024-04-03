@@ -8,6 +8,9 @@ type typ =
 | Func of typ list * typ
 | None
 
+(* int x: name binding *)
+type vdecl = typ * string
+
 type expr =
   | NumLit of float
   | BoolLit of bool
@@ -15,12 +18,10 @@ type expr =
   | Id of string
   | Binop of expr * op * expr
   | Unop of op * expr
+  | DecAssign of vdecl * expr
   | Assign of string * expr
   (* function call *)
   | Call of string * expr list
-
-(* int x: name binding *)
-type bind = typ * string
 
 type stmt =
     Block of stmt list
@@ -31,7 +32,7 @@ type stmt =
   | FuncDef of {
       rtyp: typ;
       fname: string;
-      formals: bind list;
+      formals: vdecl list;
       body: stmt list;
   }
   | Continue 
