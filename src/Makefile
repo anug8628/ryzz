@@ -5,17 +5,14 @@
 # Compilation: 
 # Option 1: Simply type "make" to compile the Ryzz Language
 
-ast_pp: parser.cmo scanner.cmo ast_pp.cmo
-	ocamlc -w A -o calc $^
+ast_pp : parser.cmo scanner.cmo ast_pp.cmo
+	ocamlc -w A -o ast_pp $^
 
 %.cmo : %.ml
 	ocamlc -w A -c $<
 
 %.cmi : %.mli
 	ocamlc -w A -c $<
-
-ast_pp : ast_pp.ml ast.cmo
-	ocamlc -w A -o ast_pp $^
 
 scanner.ml : scanner.mll
 	ocamllex $^

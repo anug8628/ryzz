@@ -37,7 +37,7 @@ rule tokenize = parse
 | '+' { PLUS }
 | '-' { MINUS }
 | '*' { TIMES }
-| '/' { DIVIDE }
+| '/' { DIV }
 | '%' { MOD }
 | '=' { ASSIGN }
 | "==" { EQ }
@@ -67,20 +67,19 @@ rule tokenize = parse
 | "return" { RETURN }
   (* LITERALS *)
 | number as num {NUMLIT (float_of_string num)}
-| "true" {BOOLIT true}
-| "false" {BOOLIT false}
+| "true" {BOOLLIT true}
+| "false" {BOOLLIT false}
 | string as str {STRINGLIT (String.sub str 1 (String.length str - 2))}
 | id as var {ID var}
 | eof { EOF }
 
 and single_line_comment = parse
-  | '\n' { next_line lexbuf; read_token lexbuf }
+  | '\n' { next_line lexbuf; tokenize lexbuf }
   | eof { EOF }
-  | _ { read_single_line_comment lexbuf }
+  | _ { single_line_comment lexbuf }
 
 
 and multi_line_comment = parse
-  | "/*" { read_token lexbuf }
-  | '\n' { next_line lexbuf; read_multi_line_comment lexbuf }
-  | eof { raise (SyntaxError ("Unexpected EOF - terminate your comment.")) }
-  | _ { read_multi_line_comment lexbuf }
+  | "/*" { tokenize lexbuf }
+  | '\n' { next_line lexbuf; multi_line_comment lexbuf }
+  | _ { multi_line_comment lexbuf }

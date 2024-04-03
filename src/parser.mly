@@ -30,10 +30,14 @@
 program:
   stmt_list EOF { $1 }
 
+// stmt_list:
+//    /* nothing */ { ([], [])               }
+//  | stmt stmt_list { (($1 :: fst $2), snd $2) }
+//  | func_def stmt_list { (fst $2, ($1 :: snd $2)) }
+
 stmt_list:
-   /* nothing */ { ([], [])               }
- | stmt stmt_list { (($1 :: fst $2), snd $2) }
- | func_def stmt_list { (fst $2, ($1 :: snd $2)) }
+  /* nothing */ { [] }
+  | stmt stmt_list { $1 :: $2 }   
 
 vdecl:
   typ ID { ($1, $2) }
@@ -41,13 +45,13 @@ vdecl:
 /* fdecl */
 func_def:
   FUNC STRINGLIT LPAREN formals_opt RPAREN ARROW typ LCURLY stmt_list RCURLY
-  {
+  { FuncDef (
       {
         rtyp=$7;
         fname=$2;
         formals=$4;
         body=$9
-      }
+      } )
     }
 
 /* formals_opt */
@@ -88,9 +92,10 @@ stmt:
   | BREAK SEMI                              {Break }
   /* return */
   | RETURN expr SEMI                        { Return $2      }
+  | func_def                                { $1 }
 
 expr:
-    NUMLIT          { Literal($1)            }
+    NUMLIT          { NumLit($1)            }
   | BOOLLIT             { BoolLit($1)         }
   | STRINGLIT           { StringLit($1) }
   | ID               { Id($1)                 }

@@ -1,4 +1,4 @@
-type op = Add | Sub | Equal | Neq | Lt | Leq | Gt | Geq | And | Or | Not 
+type op = Add | Sub | Equal | Neq | Lt | Leq | Gt | Geq | And | Or | Not | Mod
 
 type typ = 
 | Num 
@@ -9,7 +9,7 @@ type typ =
 | None
 
 type expr =
-  | NumLit of int
+  | NumLit of float
   | BoolLit of bool
   | StringLit of string
   | Id of string
@@ -19,27 +19,26 @@ type expr =
   (* function call *)
   | Call of string * expr list
 
+(* int x: name binding *)
+type bind = typ * string
+
 type stmt =
     Block of stmt list
   | Expr of expr
   | If of expr * stmt * stmt
   | While of expr * stmt
   | For of expr * expr * expr * stmt
+  | FuncDef of {
+      rtyp: typ;
+      fname: string;
+      formals: bind list;
+      body: stmt list;
+  }
   | Continue 
   | Break
   (* return *)
   | Return of expr
 
-(* int x: name binding *)
-type bind = typ * string
 
-(* func_def: ret_typ fname formals locals body *)
-type func_def = {
-  rtyp: typ;
-  fname: string;
-  formals: bind list;
-  body: stmt list;
-}
-
-type program = stmt list * func_def list
+type program = stmt list
 

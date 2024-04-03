@@ -25,7 +25,7 @@ let rec string_of_typ = function
   | None -> "none"
 
 let rec string_of_expr = function
-  | NumLit n -> "NUMLIT {" ^ string_of_int n ^ "}"
+  | NumLit n -> "NUMLIT {" ^ string_of_float n ^ "}"
   | BoolLit b -> "BOOLLIT {" ^ string_of_bool b ^ "}"
   | StringLit s -> "STRINGLIT {" ^ s ^ "}" 
   | Id id -> "ID {" ^ id ^ "}"
@@ -34,6 +34,7 @@ let rec string_of_expr = function
   | Assign (id, e) -> "ASSIGN {" ^ id ^ " = " ^ string_of_expr e ^ "}"
   | Call (fn, args) -> "CALL {" ^ fn ^ ", [" ^ String.concat ", " (List.map string_of_expr args) ^ "]}"
 
+let string_of_bind (typ, name) = "BIND {" ^ string_of_typ typ ^ ", " ^ name ^ "}"
 let rec string_of_stmt = function
   | Expr expr -> "STMT {" ^ string_of_expr expr ^ "}"
   | Block stmts -> "BLOCK {" ^ String.concat ", " (List.map string_of_stmt stmts) ^ "}"
@@ -43,21 +44,19 @@ let rec string_of_stmt = function
   | Continue -> "CONTINUE"
   | Break -> "BREAK"
   | Return expr -> "RETURN {" ^ string_of_expr expr ^ "}"
-
-let string_of_bind (typ, name) = "BIND {" ^ string_of_typ typ ^ ", " ^ name ^ "}"
-
-let string_of_func_def (func_def : func_def ) = "FUNC_DEF {" ^ 
+  | FuncDef func_def -> "FUNC_DEF {" ^ 
   "rtype: {" ^ string_of_typ func_def.rtyp ^ "}, " ^
   "fname: {" ^ func_def.fname ^ "}, " ^
   "formals: { [" ^ String.concat ", " (List.map string_of_bind func_def.formals) ^ "] }, " ^
   "body: { [" ^ String.concat ", " (List.map string_of_stmt func_def.body) ^ "] }"
 
-let string_of_program (stmt_list, func_def_list) = "PROGRAM { " ^ String.concat ", " (List.map string_of_stmt stmt_list) ^ ", " ^ String.concat ", " (List.map string_of_func_def func_def_list)  ^ " }"
+let string_of_program stmt_list = "PROGRAM { " ^ String.concat ", " (List.map string_of_stmt stmt_list) ^ " }"
 
 let _ =
-  let lexbuf = Lexing.from_channel stdin in
-  let program = Parser.expr Scanner.tokenize lexbuf in
-  print_endline (string_of_program program)
+    let lexbuf = Lexing.from_channel stdin in
+    let program = Parser.program Scanner.tokenize lexbuf in
+    print_endline (string_of_program program)
+
 
 (* let print_ast program =
   print_endline (string_of_program program)
