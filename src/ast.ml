@@ -3,7 +3,7 @@ type op = Add | Sub | Equal | Neq | Lt | Leq | Gt | Geq | And | Or | Not
 type typ = 
 | Num 
 | Bool 
-| String of string 
+| String
 | Arr of typ 
 | Func of typ list * typ
 | None
@@ -38,8 +38,8 @@ type func_def = {
   rtyp: typ;
   fname: string;
   formals: bind list;
-  locals: bind list;
   body: stmt list;
 }
 
-type program = bind list * func_def list
+type program = stmt list * func_def list
+

@@ -28,7 +28,7 @@
 %%
 
 program:
-  stmt_list EOF { $1}
+  stmt_list EOF { $1 }
 
 stmt_list:
    /* nothing */ { ([], [])               }
