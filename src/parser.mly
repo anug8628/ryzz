@@ -12,34 +12,39 @@
 %token <string> ID
 
 %right ASSIGN
-%left OR
-%left AND
-%left EQ NEQ
-%left LT GT LEQ GEQ
+%left LSQUARE
+%left ARROW
 %left PLUS MINUS
 %left TIMES DIV MOD
+%left EQ NEQ LT LEQ GT GEQ
+%left AND
+%left OR
+%right NOT
+
 
 %start program
-%type <Ast.tokenseq> program
+%type <Ast.program> program
+
+%%
 
 program:
   stmt_list EOF { $1}
 
 stmt_list:
    /* nothing */ { ([], [])               }
- | stmt stmt_list { (($1 :: fst $3), snd $3) }
- | fdecl stmt_list { (fst $2, ($1 :: snd $2)) }
+ | stmt stmt_list { (($1 :: fst $2), snd $2) }
+ | func_def stmt_list { (fst $2, ($1 :: snd $2)) }
 
 vdecl:
   typ ID { ($1, $2) }
 
 /* fdecl */
-fdecl:
-  FUNC STRING LPAREN formals_opt RPAREN ARROW typ LBRACE stmt_list RBRACE
+func_def:
+  FUNC STRINGLIT LPAREN formals_opt RPAREN ARROW typ LCURLY stmt_list RCURLY
   {
       {
-        rtyp=fst $7;
-        fname=snd $2;
+        rtyp=$7;
+        fname=$2;
         formals=$4;
         body=$9
       }
@@ -58,15 +63,17 @@ typ:
     NUM   { Num   }
   | BOOL  { Bool  }
   | STRING { String }
-  | typ LSQUARE RSQUARE [Arr ($1)]
+  | typ LSQUARE RSQUARE {Arr ($1)} 
   | FUNC LPAREN typ_opt RPAREN ARROW typ { Func ($3, $6) }
+  | LPAREN typ RPAREN { $2 }
+
 
 typ_opt:
   /*nothing*/ { [] }
-  | types_list { $1 }
+  | typ_list { $1 }
 
 typ_list:
-  type { [$1] }
+  typ { [$1] }
   | typ COMMA typ_list { $1::$3 }
 
 stmt:
@@ -84,12 +91,13 @@ stmt:
 
 expr:
     NUMLIT          { Literal($1)            }
-  | BOOLIT             { BoolLit($1)            }
+  | BOOLLIT             { BoolLit($1)         }
+  | STRINGLIT           { StringLit($1) }
   | ID               { Id($1)                 }
   | expr PLUS   expr { Binop($1, Add,   $3)   }
   | expr MINUS  expr { Binop($1, Sub,   $3)   }
   | expr TIMES  expr { Binop($1, Add,   $3)   }
-  | expr DIVIDE expr { Binop($1, Sub,   $3)   }
+  | expr DIV    expr { Binop($1, Sub,   $3)   }
   | expr MOD    expr { Binop($1, Mod,   $3)   }
   | expr EQ     expr { Binop($1, Equal, $3)   }
   | expr NEQ    expr { Binop($1, Neq, $3)     }

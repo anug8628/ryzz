@@ -11,6 +11,7 @@ type typ =
 type expr =
   | NumLit of int
   | BoolLit of bool
+  | StringLit of string
   | Id of string
   | Binop of expr * op * expr
   | Unop of op * expr
