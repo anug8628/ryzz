@@ -1,4 +1,4 @@
-type op = Add | Sub | Equal | Neq | Lt | Leq | Gt | Geq | And | Or | Not | Mod
+type op = Add | Sub | Times | Div | Mod | Equal | Neq | Lt | Leq | Gt | Geq | And | Or | Not 
 
 type typ = 
 | Num 
