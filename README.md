@@ -3,6 +3,6 @@
 ## Testing
 To test the parser:
 ```
-make
-./ast_pp < test > out
+ocamlbuild parse_test.native
+./parse_test.native < test
 ```
