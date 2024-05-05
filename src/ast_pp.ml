@@ -1,9 +1,6 @@
 open Ast
 
-let rec indent n =
-  String.make (2 * n) ' '
-
-let rec string_of_op = function
+let string_of_op = function
   | Add -> "ADD"
   | Sub -> "SUB"
   | Equal -> "EQUAL"
