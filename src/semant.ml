@@ -17,6 +17,10 @@ let check (stmts) =
       | _ :: t -> dups t
     in dups (List.sort (fun (_,a) (_,b) -> compare a b) binds)
   in
+  let add_func fd = 
+    let params = List.map fst fd.formals in
+    StringMap.add fd.fname Func(params, fd.rtyp) !symbol_table
+  in
   let built_in_decls =
     StringMap.add "print" ([String], None)
   in
@@ -95,7 +99,7 @@ let check (stmts) =
       let (t', e') = check_expr e in
       let err = "illegal assignment " ^ string_of_typ t ^ " = " ^
                 string_of_typ t' ^ " in " ^ string_of_expr e
-      in let res = check_assign(check_assign t t' err, SDecAssign((t, id), (t', e'))) in
+      in let res = (check_assign t t' err, SDecAssign((t, id), (t', e'))) in
       symbol_table := StringMap.add id t !symbol_table;
       res
   in
@@ -124,26 +128,9 @@ let check (stmts) =
     | While(e, st) -> SWhile(check_bool_expr e, check_stmt st)
     | For (e1, e2, e3, s) -> SFor(check_expr e1, check_bool_expr e2, check_expr e3, check_stmt s)
     | FuncDef fd -> check_func fd
-  and check_loop_stmt_list stmts = 
-    let old_symbol_table = !symbol_table in
-    symbol_table := copy_map !symbol_table;
-    let res = 
-      match stmts with
-      | [] -> []
-      | s :: sl -> check_loop_stmt s :: check_loop_stmt_list sl
-    in
-    symbol_table := old_symbol_table;
-    res
-  and check_loop_stmt stmt = 
-    match stmt with
-    | Block sl -> SBlock (check_loop_stmt_list sl)
-    | Expr e -> SExpr (check_expr e)
-    | If(e, st1, st2) -> SIf(check_bool_expr e, check_loop_stmt st1, check_loop_stmt st2)
-    | While(e, st) -> SWhile(check_bool_expr e, check_loop_stmt st)
-    | For (e1, e2, e3, s) -> SFor(check_expr e1, check_bool_expr e2, check_expr e3, check_loop_stmt s)
     | Continue -> SContinue
     | Break -> SBreak
-    | FuncDef fd -> check_func fd
+    | _ -> raise (Failure ("invalid return"))
   and check_func fd = 
     let _ = add_func fd in
     let _ = check_binds "formal" fd.formals in
