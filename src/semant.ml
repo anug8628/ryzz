@@ -7,7 +7,7 @@ module StringMap = Map.Make(String)
 
 let symbol_table = ref StringMap.empty
 
-let check (stmts) = 
+let check (stmts): Sast.program = 
   (* Verify a list of bindings has no duplicate names *)
   let check_binds (kind : string) (binds : (typ * string) list) =
     let rec dups = function
@@ -19,14 +19,14 @@ let check (stmts) =
   in
   let add_func fd = 
     let params = List.map fst fd.formals in
-    StringMap.add fd.fname Func(params, fd.rtyp) !symbol_table
+    StringMap.add (fd.fname) (Func(params, fd.rtyp)) (!symbol_table)
   in
   let built_in_decls =
-    StringMap.add "print" ([String], None)
+    StringMap.add ("print") (Func([String], None)) (!symbol_table)
   in
   let find_func s = 
     let res = try StringMap.find s !symbol_table
-      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+      with Not_found -> raise (Failure ("undeclared function " ^ s))
     in match res with
       | Func (params, rtyp) -> (params, rtyp)
       | _ -> raise (Failure ("not a function " ^ s))
@@ -134,11 +134,11 @@ let check (stmts) =
   and check_func fd = 
     let _ = add_func fd in
     let _ = check_binds "formal" fd.formals in
-    {
-      srtyp = func.rtyp;
-      sfname = func.fname;
-      sformals = func.formals;
-      sbody = check_func_stmt_list func.body fd
+    SFuncDef {
+      srtyp = fd.rtyp;
+      sfname = fd.fname;
+      sformals = fd.formals;
+      sbody = check_func_stmt_list fd.body fd
     }
   and check_func_stmt_list stmts fd = 
     let old_symbol_table = !symbol_table in
@@ -146,17 +146,17 @@ let check (stmts) =
     let res = 
       match stmts with
       | [] -> []
-      | s :: sl -> check_func_stmt s :: check_func_stmt_list sl fd
+      | s :: sl -> check_func_stmt s fd :: check_func_stmt_list sl fd
     in
     symbol_table := old_symbol_table;
     res
   and check_func_stmt stmt fd = 
     match stmt with
-    | Block sl -> SBlock (check_func_stmt_list sl)
+    | Block sl -> SBlock (check_func_stmt_list sl fd)
     | Expr e -> SExpr (check_expr e)
-    | If(e, st1, st2) -> SIf(check_bool_expr e, check_func_stmt st1, check_func_stmt st2)
-    | While(e, st) -> SWhile(check_bool_expr e, check_func_stmt st)
-    | For (e1, e2, e3, s) -> SFor(check_expr e1, check_bool_expr e2, check_expr e3, check_func_stmt s)
+    | If(e, st1, st2) -> SIf(check_bool_expr e, check_func_stmt st1 fd, check_func_stmt st2 fd)
+    | While(e, st) -> SWhile(check_bool_expr e, check_func_stmt st fd)
+    | For (e1, e2, e3, s) -> SFor(check_expr e1, check_bool_expr e2, check_expr e3, check_func_stmt s fd)
     | Continue -> SContinue
     | Break -> SBreak
     | FuncDef fd -> check_func fd
@@ -165,5 +165,5 @@ let check (stmts) =
       if t = fd.rtyp then SReturn (t, e')
       else raise (
           Failure ("return gives " ^ string_of_typ t ^ " expected " ^
-                   string_of_typ func.rtyp ^ " in " ^ string_of_expr e))
-    in List.map check_stmt_list stmts
+                   string_of_typ fd.rtyp ^ " in " ^ string_of_expr e))
+    in (check_stmt_list stmts)
