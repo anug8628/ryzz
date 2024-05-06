@@ -8,6 +8,10 @@ module StringMap = Map.Make(String)
 let symbol_table = ref StringMap.empty
 
 let check (stmts): Sast.program = 
+  (* For Debugging *)
+  let map_to_str m = 
+    let inners = List.map (fun (k, v) -> k ^ " -> " ^ (string_of_typ v)) (StringMap.bindings m)
+    in "[" ^ (String.concat ", " inners) ^ "]" in
   (* Verify a list of bindings has no duplicate names *)
   let check_binds (kind : string) (binds : (typ * string) list) =
     let rec dups = function
@@ -17,12 +21,15 @@ let check (stmts): Sast.program =
       | _ :: t -> dups t
     in dups (List.sort (fun (_,a) (_,b) -> compare a b) binds)
   in
+  let add_identifier (t, id) = 
+    symbol_table := StringMap.add id t !symbol_table
+  in
   let add_func fd = 
     let params = List.map fst fd.formals in
-    StringMap.add (fd.fname) (Func(params, fd.rtyp)) (!symbol_table)
+    symbol_table := StringMap.add (fd.fname) (Func(params, fd.rtyp)) (!symbol_table)
   in
   let built_in_decls =
-    StringMap.add ("print") (Func([String], None)) (!symbol_table)
+    symbol_table := StringMap.add ("print") (Func([String], None)) (!symbol_table)
   in
   let find_func s = 
     let res = try StringMap.find s !symbol_table
@@ -111,18 +118,20 @@ let check (stmts): Sast.program =
     |  _ -> raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
   in
   let rec check_stmt_list stmts = 
-    let old_symbol_table = !symbol_table in
-    symbol_table := copy_map !symbol_table;
-    let res = 
-      match stmts with
-      | [] -> []
-      | s :: sl -> check_stmt s :: check_stmt_list sl
-    in
-    symbol_table := old_symbol_table;
-    res
+    match stmts with
+    | [] -> []
+    | s :: sl -> check_stmt s :: check_stmt_list sl
   and check_stmt stmt = 
+    (* Debugging *)
+    print_endline(string_of_stmt stmt);
+    print_endline(map_to_str !symbol_table);
     match stmt with
-    | Block sl -> SBlock (check_stmt_list sl)
+    | Block sl -> 
+      let old_symbol_table = !symbol_table in
+      symbol_table := copy_map !symbol_table;
+      let res = SBlock (check_stmt_list sl) in
+      symbol_table := old_symbol_table;
+      res
     | Expr e -> SExpr (check_expr e)
     | If(e, st1, st2) -> SIf(check_bool_expr e, check_stmt st1, check_stmt st2)
     | While(e, st) -> SWhile(check_bool_expr e, check_stmt st)
@@ -134,25 +143,29 @@ let check (stmts): Sast.program =
   and check_func fd = 
     let _ = add_func fd in
     let _ = check_binds "formal" fd.formals in
-    SFuncDef {
+    let old_symbol_table = !symbol_table in
+    symbol_table := copy_map !symbol_table;
+    let _ = List.iter add_identifier fd.formals in
+    let res = SFuncDef {
       srtyp = fd.rtyp;
       sfname = fd.fname;
       sformals = fd.formals;
       sbody = check_func_stmt_list fd.body fd
-    }
-  and check_func_stmt_list stmts fd = 
-    let old_symbol_table = !symbol_table in
-    symbol_table := copy_map !symbol_table;
-    let res = 
-      match stmts with
-      | [] -> []
-      | s :: sl -> check_func_stmt s fd :: check_func_stmt_list sl fd
-    in
+    } in
     symbol_table := old_symbol_table;
     res
+  and check_func_stmt_list stmts fd = 
+    match stmts with
+    | [] -> []
+    | s :: sl -> check_func_stmt s fd :: check_func_stmt_list sl fd
   and check_func_stmt stmt fd = 
     match stmt with
-    | Block sl -> SBlock (check_func_stmt_list sl fd)
+    | Block sl -> 
+      let old_symbol_table = !symbol_table in
+      symbol_table := copy_map !symbol_table;
+      let res = SBlock (check_func_stmt_list sl fd) in
+      symbol_table := old_symbol_table;
+      res
     | Expr e -> SExpr (check_expr e)
     | If(e, st1, st2) -> SIf(check_bool_expr e, check_func_stmt st1 fd, check_func_stmt st2 fd)
     | While(e, st) -> SWhile(check_bool_expr e, check_func_stmt st fd)
@@ -166,4 +179,4 @@ let check (stmts): Sast.program =
       else raise (
           Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                    string_of_typ fd.rtyp ^ " in " ^ string_of_expr e))
-    in (check_stmt_list stmts)
+    in (check_stmt_list (List.rev stmts))
