@@ -29,16 +29,17 @@ type stmt =
   | If of expr * stmt * stmt
   | While of expr * stmt
   | For of expr * expr * expr * stmt
-  | FuncDef of {
-      rtyp: typ;
-      fname: string;
-      formals: vdecl list;
-      body: stmt list;
-  }
+  | FuncDef of func_def
   | Continue 
   | Break
   (* return *)
   | Return of expr
+and func_def = {
+  rtyp: typ;
+  fname: string;
+  formals: vdecl list;
+  body: stmt list;
+}
 
 
 type program = stmt list
@@ -46,6 +47,8 @@ type program = stmt list
 let string_of_op = function
   | Add -> "ADD"
   | Sub -> "SUB"
+  | Times -> "TIMES"
+  | Div -> "DIV"
   | Equal -> "EQUAL"
   | Neq -> "NEQ"
   | Lt -> "LT"
