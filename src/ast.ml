@@ -1,8 +1,54 @@
-open Ast
+type op = Add | Sub | Times | Div | Mod | Equal | Neq | Lt | Leq | Gt | Geq | And | Or | Not 
+
+type typ = 
+| Num 
+| Bool 
+| String
+| Arr of typ 
+| Func of typ list * typ
+| None
+
+(* int x: name binding *)
+type vdecl = typ * string
+
+type expr =
+  | NumLit of float
+  | BoolLit of bool
+  | StringLit of string
+  | Id of string
+  | Binop of expr * op * expr
+  | Unop of op * expr
+  | DecAssign of vdecl * expr
+  | Assign of string * expr
+  (* function call *)
+  | Call of string * expr list
+
+type stmt =
+    Block of stmt list
+  | Expr of expr
+  | If of expr * stmt * stmt
+  | While of expr * stmt
+  | For of expr * expr * expr * stmt
+  | FuncDef of func_def
+  | Continue 
+  | Break
+  (* return *)
+  | Return of expr
+and func_def = {
+  rtyp: typ;
+  fname: string;
+  formals: vdecl list;
+  body: stmt list;
+}
+
+
+type program = stmt list
 
 let string_of_op = function
   | Add -> "ADD"
   | Sub -> "SUB"
+  | Times -> "TIMES"
+  | Div -> "DIV"
   | Equal -> "EQUAL"
   | Neq -> "NEQ"
   | Lt -> "LT"
@@ -52,30 +98,3 @@ let rec string_of_stmt = function
   "body: { [" ^ String.concat ", " (List.map string_of_stmt func_def.body) ^ "] }"
 
 let string_of_program stmt_list = "PROGRAM { [" ^ String.concat ", " (List.map string_of_stmt stmt_list) ^ "] }"
-
-let _ =
-    let lexbuf = Lexing.from_channel stdin in
-    let program = Parser.program Scanner.tokenize lexbuf in
-    print_endline (string_of_program program)
-
-
-(* let print_ast program =
-  print_endline (string_of_program program)
-
-let example_ast = (
-  [(Num, "x"); (Bool, "y")],
-  [
-    { rtyp = Num;
-      fname = "main";
-      formals = [];
-      locals = [];
-      body = [
-        Expr (NumLit 42);
-        Expr (Binop (Id "x", Add, Id "y"));
-        Expr (Call ("print", [Id "z"]))
-      ]
-    }
-  ]
-)
-
-let _ = print_ast example_ast *)

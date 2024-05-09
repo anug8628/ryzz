@@ -72,6 +72,7 @@ rule tokenize = parse
 | string as str {STRINGLIT (String.sub str 1 (String.length str - 2))}
 | id as var {ID var}
 | eof { EOF }
+| _ as c { failwith (Printf.sprintf "unexpected character: %C" c) }
 
 and single_line_comment = parse
   | '\n' { next_line lexbuf; tokenize lexbuf }
