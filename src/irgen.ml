@@ -29,7 +29,7 @@ let translate (stmts) =
       A.Num   -> float_t
     | A.Bool  -> bool_t
     | A.String -> string_t
-    | A.None -> L.void_type context
+    | A.None -> float_t
     | A.Func (params, rtype) -> 
       let formal_types = Array.of_list (List.map ltype_of_typ params) in 
       L.function_type (ltype_of_typ rtype) formal_types
