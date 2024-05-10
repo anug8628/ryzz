@@ -19,16 +19,17 @@ type sstmt =
   | SIf of sexpr * sstmt * sstmt
   | SWhile of sexpr * sstmt
   | SFor of sexpr * sexpr * sexpr * sstmt
-  | SFuncDef of {
+  | SFuncDef of sfunc_def
+  | SContinue 
+  | SBreak
+  (* return *)
+  | SReturn of sexpr
+  and sfunc_def = {
       srtyp: typ;
       sfname: string;
       sformals: vdecl list;
       sbody: sstmt list;
   }
-  | SContinue 
-  | SBreak
-  (* return *)
-  | SReturn of sexpr
 
 type program = sstmt list
 
