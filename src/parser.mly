@@ -1,6 +1,6 @@
 %{ open Ast %}
 
-%token LCURLY RCURLY LPAREN RPAREN LSQUARE RSQUARE COMMA SEMI 
+%token LCURLY RCURLY LPAREN RPAREN LSQUARE RSQUARE COMMA SEMI COLON
 %token PLUS MINUS TIMES DIV MOD ASSIGN EQ NEQ LT LEQ GT GEQ AND OR NOT
 %token IF ELSE FOR WHILE CONTINUE BREAK
 %token ARROW RETURN
@@ -53,6 +53,17 @@ func_def:
         body=$9
       } )
     }
+  | FUNC ID LPAREN formals_opt RPAREN ARROW typ COLON expr SEMI
+  {
+    FuncDef (
+      {
+        rtyp=$7;
+        fname=$2;
+        formals=$4;
+        body=[Return($9)]
+      }
+    )
+  }
 
 /* formals_opt */
 formals_opt:

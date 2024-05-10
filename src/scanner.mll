@@ -33,6 +33,7 @@ rule tokenize = parse
 | '}' { RCURLY }
 | ',' { COMMA }
 | ';' { SEMI }
+| ':' { COLON }
   (* Operators *)
 | '+' { PLUS }
 | '-' { MINUS }
