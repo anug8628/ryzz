@@ -1,0 +1,28 @@
+num i = 0;
+func fizzbuzz(num n, func () -> none fizz, func () -> none buzz) -> none {
+    while (i < n) {
+        if (i % 3 == 0 and i % 5 == 0) {
+            fizz();
+            buzz();
+        } 
+        else if (i % 3 == 0) {
+            fizz();
+        }
+        else if (i % 5 == 0) {
+            buzz();
+        } else {
+
+        }
+        i = i + 1;
+    }
+}
+
+func fizz() -> none {
+    print("fizz");
+}
+
+func buzz() -> none {
+    print("buzz");
+}
+
+fizzbuzz(10, fizz, buzz);
