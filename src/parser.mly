@@ -14,12 +14,12 @@
 %right ASSIGN
 %left LSQUARE
 %left ARROW
-%left PLUS MINUS
-%left TIMES DIV MOD
-%left EQ NEQ LT LEQ GT GEQ
 %left AND
 %left OR
 %right NOT
+%left EQ NEQ LT LEQ GT GEQ
+%left PLUS MINUS
+%left TIMES DIV MOD
 
 
 %start program
