@@ -1,0 +1,19 @@
+num a = 1;
+
+func hello(num a) -> num{
+    a = 3; 
+
+    num b = 3;
+    for (num i = 1; i <= 6; i += 1) {
+        num b = i;
+    }
+    return a + b;
+}
+
+if (hello(a) != 6) {
+    print("Error!");
+}
+
+if (a != 1) {
+    print("Error!");
+}

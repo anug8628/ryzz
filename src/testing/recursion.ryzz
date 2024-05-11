@@ -1,0 +1,15 @@
+func fib(num a) -> num {
+    if (a == 1) {
+        return 1;
+    } else if (a == 0) {
+        return 1;
+    } else {
+        return fib(a-1) + fib(a-2);
+    }
+}
+
+if (fib(1) != 1 or fib(2) != 2 or fib(6) != 13) {
+    print("problem with recursion!");
+} else {
+    print("recursion good!");
+}

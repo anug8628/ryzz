@@ -1,0 +1,23 @@
+num a = 10;
+num b = 5;
+num c = 2;
+
+num result = a + b * c - a / c % b;
+
+if (result != 20) {
+    print("Error in operator precedence!");
+} else {
+    print("Operator precedence good!");
+}
+
+num mult = b * c;  
+num div = a / b; 
+num mod = a % c;  
+num add = mult + div;  
+num sub = a - mod;
+
+if (mult != 10 or div != 2 or mod != 0 or add != 12 or sub != 10) {
+    print("Error in basic operations!");
+} else {
+    print("Basic operations good!");
+}
