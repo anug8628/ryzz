@@ -1,0 +1,78 @@
+STMT {DECASSIGN {VDECL {num, a} = NUMLIT {10.}}}
+[print -> func { params: [string], rtype: none}]
+STMT {DECASSIGN {VDECL {num, b} = NUMLIT {5.}}}
+[a -> num, print -> func { params: [string], rtype: none}]
+STMT {DECASSIGN {VDECL {num, c} = NUMLIT {2.}}}
+[a -> num, b -> num, print -> func { params: [string], rtype: none}]
+STMT {DECASSIGN {VDECL {num, result} = BINOP {BINOP {ID {a} ADD BINOP {ID {b} TIMES ID {c}}} SUB BINOP {BINOP {ID {a} DIV ID {c}} MOD ID {b}}}}}
+[a -> num, b -> num, c -> num, print -> func { params: [string], rtype: none}]
+IF {BINOP {ID {result} NEQ NUMLIT {20.}}, BLOCK {STMT {CALL {print, [STRINGLIT {Error in operator precedence!}]}}}, BLOCK {STMT {CALL {print, [STRINGLIT {Operator precedence good!}]}}}}
+[a -> num, b -> num, c -> num, print -> func { params: [string], rtype: none}, result -> num]
+BLOCK {STMT {CALL {print, [STRINGLIT {Operator precedence good!}]}}}
+[a -> num, b -> num, c -> num, print -> func { params: [string], rtype: none}, result -> num]
+STMT {CALL {print, [STRINGLIT {Operator precedence good!}]}}
+[a -> num, b -> num, c -> num, print -> func { params: [string], rtype: none}, result -> num]
+BLOCK {STMT {CALL {print, [STRINGLIT {Error in operator precedence!}]}}}
+[a -> num, b -> num, c -> num, print -> func { params: [string], rtype: none}, result -> num]
+STMT {CALL {print, [STRINGLIT {Error in operator precedence!}]}}
+[a -> num, b -> num, c -> num, print -> func { params: [string], rtype: none}, result -> num]
+STMT {DECASSIGN {VDECL {num, mult} = BINOP {ID {b} TIMES ID {c}}}}
+[a -> num, b -> num, c -> num, print -> func { params: [string], rtype: none}, result -> num]
+STMT {DECASSIGN {VDECL {num, div} = BINOP {ID {a} DIV ID {b}}}}
+[a -> num, b -> num, c -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num]
+STMT {DECASSIGN {VDECL {num, mod} = BINOP {ID {a} MOD ID {c}}}}
+[a -> num, b -> num, c -> num, div -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num]
+STMT {DECASSIGN {VDECL {num, add} = BINOP {ID {mult} ADD ID {div}}}}
+[a -> num, b -> num, c -> num, div -> num, mod -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num]
+STMT {DECASSIGN {VDECL {num, sub} = BINOP {ID {a} SUB ID {mod}}}}
+[a -> num, add -> num, b -> num, c -> num, div -> num, mod -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num]
+IF {BINOP {BINOP {BINOP {BINOP {BINOP {ID {mult} NEQ NUMLIT {10.}} OR BINOP {ID {div} NEQ NUMLIT {2.}}} OR BINOP {ID {mod} NEQ NUMLIT {0.}}} OR BINOP {ID {add} NEQ NUMLIT {12.}}} OR BINOP {ID {sub} NEQ NUMLIT {10.}}}, BLOCK {STMT {CALL {print, [STRINGLIT {Error in basic operations!}]}}}, BLOCK {STMT {CALL {print, [STRINGLIT {Basic operations good!}]}}}}
+[a -> num, add -> num, b -> num, c -> num, div -> num, mod -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num, sub -> num]
+BLOCK {STMT {CALL {print, [STRINGLIT {Basic operations good!}]}}}
+[a -> num, add -> num, b -> num, c -> num, div -> num, mod -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num, sub -> num]
+STMT {CALL {print, [STRINGLIT {Basic operations good!}]}}
+[a -> num, add -> num, b -> num, c -> num, div -> num, mod -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num, sub -> num]
+BLOCK {STMT {CALL {print, [STRINGLIT {Error in basic operations!}]}}}
+[a -> num, add -> num, b -> num, c -> num, div -> num, mod -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num, sub -> num]
+STMT {CALL {print, [STRINGLIT {Error in basic operations!}]}}
+[a -> num, add -> num, b -> num, c -> num, div -> num, mod -> num, mult -> num, print -> func { params: [string], rtype: none}, result -> num, sub -> num]
+
+
+Sementically checked program: 
+
+if ((bool : (bool : (bool : (bool : (bool : (num : mult) NEQ (num : 10.)) OR (bool : (num : div) NEQ (num : 2.))) OR (bool : (num : mod) NEQ (num : 0.))) OR (bool : (num : add) NEQ (num : 12.))) OR (bool : (num : sub) NEQ (num : 10.))))
+{
+(none : print((string : Error in basic operations!)));
+}
+else
+{
+(none : print((string : Basic operations good!)));
+}
+
+(num : num sub(num : (num : a) SUB (num : mod)));
+
+(num : num add(num : (num : mult) ADD (num : div)));
+
+(num : num mod(num : (num : a) MOD (num : c)));
+
+(num : num div(num : (num : a) DIV (num : b)));
+
+(num : num mult(num : (num : b) TIMES (num : c)));
+
+if ((bool : (num : result) NEQ (num : 20.)))
+{
+(none : print((string : Error in operator precedence!)));
+}
+else
+{
+(none : print((string : Operator precedence good!)));
+}
+
+(num : num result(num : (num : (num : a) ADD (num : (num : b) TIMES (num : c))) SUB (num : (num : (num : a) DIV (num : c)) MOD (num : b))));
+
+(num : num c(num : 2.));
+
+(num : num b(num : 5.));
+
+(num : num a(num : 10.));
+

@@ -1,0 +1,53 @@
+STMT {DECASSIGN {VDECL {num, i} = NUMLIT {0.}}}
+[print -> func { params: [string], rtype: none}]
+FUNC_DEF {rtype: {none}, fname: {fizzbuzz}, formals: { [BIND {num, n}, BIND {func { params: [], rtype: none}, fizz}, BIND {func { params: [], rtype: none}, buzz}] }, body: { [WHILE {BINOP {ID {i} LT ID {n}}, BLOCK {IF {BINOP {BINOP {BINOP {ID {i} MOD NUMLIT {3.}} EQUAL NUMLIT {0.}} AND BINOP {BINOP {ID {i} MOD NUMLIT {5.}} EQUAL NUMLIT {0.}}}, BLOCK {STMT {CALL {fizz, []}}, STMT {CALL {buzz, []}}}, IF {BINOP {BINOP {ID {i} MOD NUMLIT {3.}} EQUAL NUMLIT {0.}}, BLOCK {STMT {CALL {fizz, []}}}, IF {BINOP {BINOP {ID {i} MOD NUMLIT {5.}} EQUAL NUMLIT {0.}}, BLOCK {STMT {CALL {buzz, []}}}, BLOCK {}}}}, STMT {ASSIGN {i = BINOP {ID {i} ADD NUMLIT {1.}}}}}}] }
+[i -> num, print -> func { params: [string], rtype: none}]
+FUNC_DEF {rtype: {none}, fname: {fizz}, formals: { [] }, body: { [STMT {CALL {print, [STRINGLIT {fizz}]}}] }
+[fizzbuzz -> func { params: [num, func { params: [], rtype: none}, func { params: [], rtype: none}], rtype: none}, i -> num, print -> func { params: [string], rtype: none}]
+FUNC_DEF {rtype: {none}, fname: {buzz}, formals: { [] }, body: { [STMT {CALL {print, [STRINGLIT {buzz}]}}] }
+[fizz -> func { params: [], rtype: none}, fizzbuzz -> func { params: [num, func { params: [], rtype: none}, func { params: [], rtype: none}], rtype: none}, i -> num, print -> func { params: [string], rtype: none}]
+STMT {CALL {fizzbuzz, [NUMLIT {10.}, ID {fizz}, ID {buzz}]}}
+[buzz -> func { params: [], rtype: none}, fizz -> func { params: [], rtype: none}, fizzbuzz -> func { params: [num, func { params: [], rtype: none}, func { params: [], rtype: none}], rtype: none}, i -> num, print -> func { params: [string], rtype: none}]
+
+
+Sementically checked program: 
+
+(none : fizzbuzz((num : 10.), (func { params: [], rtype: none} : fizz), (func { params: [], rtype: none} : buzz)));
+
+none buzz()
+{
+(none : print((string : buzz)));
+}
+
+none fizz()
+{
+(none : print((string : fizz)));
+}
+
+none fizzbuzz(n, fizz, buzz)
+{
+while ((bool : (num : i) LT (num : n))) {
+if ((bool : (bool : (num : (num : i) MOD (num : 3.)) EQUAL (num : 0.)) AND (bool : (num : (num : i) MOD (num : 5.)) EQUAL (num : 0.))))
+{
+(none : fizz());
+(none : buzz());
+}
+else
+if ((bool : (num : (num : i) MOD (num : 3.)) EQUAL (num : 0.)))
+{
+(none : fizz());
+}
+else
+if ((bool : (num : (num : i) MOD (num : 5.)) EQUAL (num : 0.)))
+{
+(none : buzz());
+}
+else
+{
+}
+(num : i = (num : (num : i) ADD (num : 1.)));
+}
+}
+
+(num : num i(num : 0.));
+

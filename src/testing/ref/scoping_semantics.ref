@@ -1,0 +1,60 @@
+STMT {DECASSIGN {VDECL {num, a} = NUMLIT {1.}}}
+[print -> func { params: [string], rtype: none}]
+STMT {DECASSIGN {VDECL {num, b} = NUMLIT {3.}}}
+[a -> num, print -> func { params: [string], rtype: none}]
+STMT {DECASSIGN {VDECL {num, i} = NUMLIT {0.}}}
+[a -> num, b -> num, print -> func { params: [string], rtype: none}]
+FUNC_DEF {rtype: {num}, fname: {hello}, formals: { [BIND {num, a}] }, body: { [STMT {ASSIGN {a = NUMLIT {3.}}}, WHILE {BINOP {ID {i} LT NUMLIT {4.}}, BLOCK {STMT {DECASSIGN {VDECL {num, b} = ID {i}}}, STMT {ASSIGN {i = BINOP {ID {i} ADD NUMLIT {1.}}}}}}, RETURN {BINOP {ID {a} ADD ID {b}}}] }
+[a -> num, b -> num, i -> num, print -> func { params: [string], rtype: none}]
+IF {BINOP {CALL {hello, [ID {a}]} NEQ NUMLIT {6.}}, BLOCK {STMT {CALL {print, [STRINGLIT {Error!}]}}}, BLOCK {}}
+[a -> num, b -> num, hello -> func { params: [num], rtype: num}, i -> num, print -> func { params: [string], rtype: none}]
+BLOCK {}
+[a -> num, b -> num, hello -> func { params: [num], rtype: num}, i -> num, print -> func { params: [string], rtype: none}]
+BLOCK {STMT {CALL {print, [STRINGLIT {Error!}]}}}
+[a -> num, b -> num, hello -> func { params: [num], rtype: num}, i -> num, print -> func { params: [string], rtype: none}]
+STMT {CALL {print, [STRINGLIT {Error!}]}}
+[a -> num, b -> num, hello -> func { params: [num], rtype: num}, i -> num, print -> func { params: [string], rtype: none}]
+IF {BINOP {ID {a} NEQ NUMLIT {1.}}, BLOCK {STMT {CALL {print, [STRINGLIT {Error!}]}}}, BLOCK {}}
+[a -> num, b -> num, hello -> func { params: [num], rtype: num}, i -> num, print -> func { params: [string], rtype: none}]
+BLOCK {}
+[a -> num, b -> num, hello -> func { params: [num], rtype: num}, i -> num, print -> func { params: [string], rtype: none}]
+BLOCK {STMT {CALL {print, [STRINGLIT {Error!}]}}}
+[a -> num, b -> num, hello -> func { params: [num], rtype: num}, i -> num, print -> func { params: [string], rtype: none}]
+STMT {CALL {print, [STRINGLIT {Error!}]}}
+[a -> num, b -> num, hello -> func { params: [num], rtype: num}, i -> num, print -> func { params: [string], rtype: none}]
+
+
+Sementically checked program: 
+
+if ((bool : (num : a) NEQ (num : 1.)))
+{
+(none : print((string : Error!)));
+}
+else
+{
+}
+
+if ((bool : (num : hello((num : a))) NEQ (num : 6.)))
+{
+(none : print((string : Error!)));
+}
+else
+{
+}
+
+num hello(a)
+{
+(num : a = (num : 3.));
+while ((bool : (num : i) LT (num : 4.))) {
+(num : num b(num : i));
+(num : i = (num : (num : i) ADD (num : 1.)));
+}
+return (num : (num : a) ADD (num : b));
+}
+
+(num : num i(num : 0.));
+
+(num : num b(num : 3.));
+
+(num : num a(num : 1.));
+
