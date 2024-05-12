@@ -1,0 +1,42 @@
+FUNC_DEF {rtype: {num}, fname: {fib}, formals: { [BIND {num, a}] }, body: { [IF {BINOP {ID {a} EQUAL NUMLIT {1.}}, BLOCK {RETURN {NUMLIT {1.}}}, IF {BINOP {ID {a} EQUAL NUMLIT {0.}}, BLOCK {RETURN {NUMLIT {1.}}}, BLOCK {RETURN {BINOP {CALL {fib, [BINOP {ID {a} SUB NUMLIT {1.}}]} ADD CALL {fib, [BINOP {ID {a} SUB NUMLIT {2.}}]}}}}}}] }
+[print -> func { params: [string], rtype: none}]
+IF {BINOP {BINOP {BINOP {CALL {fib, [NUMLIT {1.}]} NEQ NUMLIT {1.}} OR BINOP {CALL {fib, [NUMLIT {2.}]} NEQ NUMLIT {2.}}} OR BINOP {CALL {fib, [NUMLIT {6.}]} NEQ NUMLIT {13.}}}, BLOCK {STMT {CALL {print, [STRINGLIT {problem with recursion!}]}}}, BLOCK {STMT {CALL {print, [STRINGLIT {recursion good!}]}}}}
+[fib -> func { params: [num], rtype: num}, print -> func { params: [string], rtype: none}]
+BLOCK {STMT {CALL {print, [STRINGLIT {recursion good!}]}}}
+[fib -> func { params: [num], rtype: num}, print -> func { params: [string], rtype: none}]
+STMT {CALL {print, [STRINGLIT {recursion good!}]}}
+[fib -> func { params: [num], rtype: num}, print -> func { params: [string], rtype: none}]
+BLOCK {STMT {CALL {print, [STRINGLIT {problem with recursion!}]}}}
+[fib -> func { params: [num], rtype: num}, print -> func { params: [string], rtype: none}]
+STMT {CALL {print, [STRINGLIT {problem with recursion!}]}}
+[fib -> func { params: [num], rtype: num}, print -> func { params: [string], rtype: none}]
+
+
+Sementically checked program: 
+
+if ((bool : (bool : (bool : (num : fib((num : 1.))) NEQ (num : 1.)) OR (bool : (num : fib((num : 2.))) NEQ (num : 2.))) OR (bool : (num : fib((num : 6.))) NEQ (num : 13.))))
+{
+(none : print((string : problem with recursion!)));
+}
+else
+{
+(none : print((string : recursion good!)));
+}
+
+num fib(a)
+{
+if ((bool : (num : a) EQUAL (num : 1.)))
+{
+return (num : 1.);
+}
+else
+if ((bool : (num : a) EQUAL (num : 0.)))
+{
+return (num : 1.);
+}
+else
+{
+return (num : (num : fib((num : (num : a) SUB (num : 1.)))) ADD (num : fib((num : (num : a) SUB (num : 2.)))));
+}
+}
+
