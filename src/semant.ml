@@ -28,8 +28,8 @@ let check (stmts): Sast.program =
     let params = List.map fst fd.formals in
     symbol_table := StringMap.add (fd.fname) (Func(params, fd.rtyp)) (!symbol_table)
   in
-  let built_in_decls =
-    symbol_table := StringMap.add ("print") (Func([String], None)) (!symbol_table)
+  let _ =
+    symbol_table := StringMap.add ("print") (Func([Num], None)) (!symbol_table)
   in
   let find_func s = 
     let res = try StringMap.find s !symbol_table
@@ -123,13 +123,13 @@ let check (stmts): Sast.program =
     | s :: sl -> check_stmt s :: check_stmt_list sl
   and check_stmt stmt = 
     (* Debugging *)
-    print_endline(string_of_stmt stmt);
-    print_endline(map_to_str !symbol_table);
+    (* print_endline(string_of_stmt stmt); *)
+    (* print_endline(map_to_str !symbol_table); *)
     match stmt with
     | Block sl -> 
       let old_symbol_table = !symbol_table in
       symbol_table := copy_map !symbol_table;
-      let res = SBlock (check_stmt_list sl) in
+      let res = SBlock (check_stmt_list (List.rev sl)) in
       symbol_table := old_symbol_table;
       res
     | Expr e -> SExpr (check_expr e)
@@ -150,7 +150,7 @@ let check (stmts): Sast.program =
       srtyp = fd.rtyp;
       sfname = fd.fname;
       sformals = fd.formals;
-      sbody = check_func_stmt_list fd.body fd
+      sbody = check_func_stmt_list (List.rev fd.body) fd
     } in
     symbol_table := old_symbol_table;
     res
@@ -163,7 +163,7 @@ let check (stmts): Sast.program =
     | Block sl -> 
       let old_symbol_table = !symbol_table in
       symbol_table := copy_map !symbol_table;
-      let res = SBlock (check_func_stmt_list sl fd) in
+      let res = SBlock (check_func_stmt_list (List.rev sl) fd) in
       symbol_table := old_symbol_table;
       res
     | Expr e -> SExpr (check_expr e)
