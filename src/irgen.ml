@@ -21,7 +21,7 @@ let translate (stmts) =
   let the_module = L.create_module context "Ryzz" in
 
   (* Get types from the context *)
-  let float_t = L.float_type context
+  let float_t = L.double_type context
   and bool_t  = L.i1_type    context 
   and string_t = L.pointer_type (L.i8_type context) in
 
@@ -34,6 +34,11 @@ let translate (stmts) =
       let formal_types = Array.of_list (List.map ltype_of_typ params) in 
       L.function_type (ltype_of_typ rtype) formal_types
   in
+
+  let printf_t : L.lltype =
+    L.var_arg_function_type float_t [| string_t |] in
+  let printf_func : L.llvalue =
+    L.declare_function "printf" printf_t the_module in
 
   let copy_map m = 
     StringMap.fold StringMap.add m StringMap.empty
@@ -49,6 +54,8 @@ let translate (stmts) =
   let rec build_function_body fdecl =
     let the_function = StringMap.find fdecl.sfname !symbol_table in
     let builder = L.builder_at_end context (L.entry_block the_function) in
+
+    let int_format_str = L.build_global_stringptr "%f\n" "fmt" builder in
   
   (* Allocate space for any locally declared variables and add the
   * resulting registers to our map *)
@@ -67,12 +74,12 @@ let translate (stmts) =
   with Not_found -> raise (Failure (n ^ " Not Found"))
 in
 
-  let formals = List.iter2 add_formal fdecl.sformals
+  let _ = List.iter2 add_formal fdecl.sformals
   (Array.to_list (L.params the_function)) in
 
   let rec build_expr builder ((t, e) : sexpr) = 
-    print_endline(string_of_sexpr (t, e));
-    print_endline(map_to_str !symbol_table);
+    (* print_endline(string_of_sexpr (t, e)); *)
+    (* print_endline(map_to_str !symbol_table); *)
     match e with
     SNumLit i  -> L.const_float float_t i
   | SBoolLit b  -> L.const_int bool_t (if b then 1 else 0)
@@ -81,7 +88,8 @@ in
   | SUnop (op, e) ->
     let e' = build_expr builder e in
     (match op with
-      A.Not -> L.build_neg  
+      A.Not -> L.build_neg 
+      | _ ->  raise(Failure ("Unsupported unary op"))
     ) e' "tmp" builder
   | SBinop (e1, op, e2) ->
     let e1' = build_expr builder e1
@@ -94,12 +102,13 @@ in
      | A.Mod     -> L.build_frem
      | A.And     -> L.build_and
      | A.Or      -> L.build_or
-     | A.Equal   -> L.build_icmp L.Icmp.Eq
-     | A.Neq     -> L.build_icmp L.Icmp.Ne
-     | A.Lt      -> L.build_icmp L.Icmp.Slt
-     | A.Leq     -> L.build_icmp L.Icmp.Sle
-     | A.Gt      -> L.build_icmp L.Icmp.Sgt
-     | A.Geq     -> L.build_icmp L.Icmp.Sge
+     | A.Equal   -> L.build_fcmp L.Fcmp.Ueq
+     | A.Neq     -> L.build_fcmp L.Fcmp.Une
+     | A.Lt      -> L.build_fcmp L.Fcmp.Ult
+     | A.Leq     -> L.build_fcmp L.Fcmp.Ule
+     | A.Gt      -> L.build_fcmp L.Fcmp.Ugt
+     | A.Geq     -> L.build_fcmp L.Fcmp.Uge
+     | _         -> raise(Failure ("Unsupported binary operation"))
     ) e1' e2' "tmp" builder
   | SAssign (s, e) -> let e' = build_expr builder e in
     ignore(L.build_store e' (lookup s) builder); e'
@@ -107,9 +116,9 @@ in
     let e' = build_expr builder e in
     let _ = add_var (t, s) in
     ignore(L.build_store e' (lookup s) builder); e'
-  (* | SCall ("print", [e]) ->
+  | SCall ("print", [e]) ->
     L.build_call printf_func [| int_format_str ; (build_expr builder e) |]
-      "printf" builder *)
+      "printf" builder
   | SCall (f, args) ->
     let fdef = StringMap.find f !symbol_table in
     let llargs = List.rev (List.map (build_expr builder) (List.rev args)) in
@@ -125,7 +134,7 @@ let add_terminal builder instr =
         SBlock sl -> 
           let old_symbol_table = !symbol_table in
           symbol_table := copy_map !symbol_table;
-          let res = List.fold_left build_stmt builder sl in
+          let res = List.fold_left build_stmt builder (List.rev sl) in
           symbol_table := old_symbol_table;
           res
       | SExpr e -> ignore(build_expr builder e); builder
@@ -200,14 +209,14 @@ let add_terminal builder instr =
       | _ -> builder
 
     in let func_builder = build_stmt builder (SBlock fdecl.sbody) in
-    add_terminal func_builder (L.build_ret (L.const_int float_t 0)) in
+    add_terminal func_builder (L.build_ret (L.const_float float_t 0.0)) in
 
   
   let main_func = {
-    srtyp = A.Num;
+    srtyp = A.None;
     sfname = "main";
     sformals = [];
-    sbody = List.rev stmts;
+    sbody = stmts;
   } in
   let _ = define_func main_func in
   build_function_body main_func;
